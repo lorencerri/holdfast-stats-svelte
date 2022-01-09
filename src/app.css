@@ -1,0 +1,18 @@
+/* Write your global styles here, in PostCSS syntax */
+
+@import url('https://fonts.googleapis.com/css2?family=Rubik&display=swap');
+
+@tailwind base;
+
+body {
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:svgjs='http://svgjs.com/svgjs' width='1440' height='560' preserveAspectRatio='none' viewBox='0 0 1440 560'%3e%3cg mask='url(%26quot%3b%23SvgjsMask1246%26quot%3b)' fill='none'%3e%3crect width='1440' height='560' x='0' y='0' fill='url(%23SvgjsLinearGradient1247)'%3e%3c/rect%3e%3cpath d='M879.17 150.43 a183.82 183.82 0 1 0 367.64 0 a183.82 183.82 0 1 0 -367.64 0z' fill='rgba(223%2c 233%2c 243%2c 0.1)' class='triangle-float2'%3e%3c/path%3e%3cpath d='M492.18227423839016 274.6415789390589L472.0943435270976 160.71726270236502 358.1700272904037 180.80519341365758 378.2579580016963 294.7295096503515z' fill='rgba(223%2c 233%2c 243%2c 0.1)' class='triangle-float1'%3e%3c/path%3e%3cpath d='M1238.981477178997 125.10308578793233L1098.1193282103982 137.42692694258466 1110.4431693650504 278.2890759111835 1251.3053183336494 265.9652347565312z' fill='rgba(223%2c 233%2c 243%2c 0.1)' class='triangle-float3'%3e%3c/path%3e%3cpath d='M297.8052886517295 461.74228478217947L163.90732505015635 500.1369080074314 336.1999118769814 595.6402483837526z' fill='rgba(223%2c 233%2c 243%2c 0.1)' class='triangle-float1'%3e%3c/path%3e%3cpath d='M438.136%2c645.663C477.295%2c646.566%2c513.784%2c623.913%2c532.201%2c589.344C549.643%2c556.603%2c543.657%2c516.876%2c523.251%2c485.895C504.822%2c457.916%2c471.632%2c445.865%2c438.136%2c446.532C405.931%2c447.173%2c375.797%2c461.874%2c358.698%2c489.172C340.438%2c518.324%2c335.726%2c554.5%2c351.296%2c585.173C368.41%2c618.888%2c400.336%2c644.791%2c438.136%2c645.663' fill='rgba(223%2c 233%2c 243%2c 0.1)' class='triangle-float1'%3e%3c/path%3e%3cpath d='M1115.7621482114926 4.987179952625247L1031.4391280179898-58.55477343108853 967.897174634276 25.7682467624143 1052.2201948277789 89.31020014612807z' fill='rgba(223%2c 233%2c 243%2c 0.1)' class='triangle-float3'%3e%3c/path%3e%3c/g%3e%3cdefs%3e%3cmask id='SvgjsMask1246'%3e%3crect width='1440' height='560' fill='white'%3e%3c/rect%3e%3c/mask%3e%3clinearGradient x1='15.28%25' y1='-39.29%25' x2='84.72%25' y2='139.29%25' gradientUnits='userSpaceOnUse' id='SvgjsLinearGradient1247'%3e%3cstop stop-color='rgba(50%2c 50%2c 50%2c 1)' offset='0'%3e%3c/stop%3e%3cstop stop-color='rgba(63%2c 63%2c 63%2c 1)' offset='0.4'%3e%3c/stop%3e%3cstop stop-color='rgba(28%2c 28%2c 28%2c 1)' offset='1'%3e%3c/stop%3e%3c/linearGradient%3e%3cstyle%3e %40keyframes float1 %7b 0%25%7btransform: translate(0%2c 0)%7d 50%25%7btransform: translate(-10px%2c 0)%7d 100%25%7btransform: translate(0%2c 0)%7d %7d .triangle-float1 %7b animation: float1 5s infinite%3b %7d %40keyframes float2 %7b 0%25%7btransform: translate(0%2c 0)%7d 50%25%7btransform: translate(-5px%2c -5px)%7d 100%25%7btransform: translate(0%2c 0)%7d %7d .triangle-float2 %7b animation: float2 4s infinite%3b %7d %40keyframes float3 %7b 0%25%7btransform: translate(0%2c 0)%7d 50%25%7btransform: translate(0%2c -10px)%7d 100%25%7btransform: translate(0%2c 0)%7d %7d .triangle-float3 %7b animation: float3 6s infinite%3b %7d %3c/style%3e%3c/defs%3e%3c/svg%3e");
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center center;
+	min-height: 100vh;
+	height: 100%;
+}
+
+@tailwind components;
+
+@tailwind utilities;
