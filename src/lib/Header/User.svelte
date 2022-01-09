@@ -2,7 +2,7 @@
 	import { sdk } from '$lib/client.js';
 
 	const fetchUser = async () => {
-		const account = await sdk.account.getSessions();
+		const account = await sdk.account.getSession();
 		console.log(account);
 		return account;
 	};
