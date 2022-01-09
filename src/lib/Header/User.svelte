@@ -10,8 +10,8 @@
 	const login = async () => {
 		sdk.account.createOAuth2Session(
 			'discord',
-			'http://paste.plexidev.org?success=true',
-			'http://paste.plexidev.org?success=false'
+			`${document.location.origin}?success=true`,
+			`${document.location.origin}?success=false`
 		);
 	};
 
@@ -25,8 +25,7 @@
 {#await promise}
 	<button class="btn btn-circle btn-ghost loading" />
 {:then user}
-	{user.name}
-	<button on:click={logout} class="btn btn-sm btn-ghost">Logout</button>
+	<button on:click={logout} class="btn btn-sm btn-ghost">{user.name}</button>
 {:catch}
 	<button on:click={login} class="btn btn-sm btn-ghost">Login with Discord</button>
 {/await}
