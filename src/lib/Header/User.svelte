@@ -4,6 +4,11 @@
 	const fetchUser = async () => {
 		const account = await sdk.account.get();
 		console.log(account);
+
+		sdk.subscribe('account', () => {
+			promise = fetchUser();
+		});
+
 		return account;
 	};
 
@@ -26,6 +31,7 @@
 	<button class="btn btn-circle btn-ghost loading" />
 {:then user}
 	<button on:click={logout} class="btn btn-sm btn-ghost">{user.name}</button>
-{:catch}
+{:catch error}
+	{(console.log(error), '')}
 	<button on:click={login} class="btn btn-sm btn-ghost">Login with Discord</button>
 {/await}
