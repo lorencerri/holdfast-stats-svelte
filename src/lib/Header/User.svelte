@@ -7,7 +7,7 @@
 	};
 
 	const login = async () => {
-		sdk.account.createOAuth2Session('discord', 'http://localhost:3000?success=true');
+		sdk.account.createOAuth2Session('discord', 'https://plexidev-paste.vercel.app?success=true');
 	};
 
 	let promise = fetchUser();
