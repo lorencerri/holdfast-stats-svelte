@@ -11,5 +11,6 @@
 {#if browser}
 	<Header />
 {/if}
-
-<slot />
+<main class="container pl-5 pr-5 mx-auto max-w-2xl">
+	<slot />
+</main>

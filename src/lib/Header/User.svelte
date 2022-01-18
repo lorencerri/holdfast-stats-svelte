@@ -11,7 +11,7 @@
 			</button>
 		</div>
 		<div class="flex items-stretch">
-			<a href="/servers/new" class="btn btn-ghost btn-sm rounded-btn">
+			<a href="/servers" class="btn btn-ghost btn-sm rounded-btn">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="inline-block w-5 mr-2 stroke-current"
