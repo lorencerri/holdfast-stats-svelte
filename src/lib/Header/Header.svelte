@@ -6,7 +6,5 @@
 	<div class="navbar-start flex-1 px-2 mx-2">
 		<a href="/" class="text-lg font-bold">Holdfast User Stats</a>
 	</div>
-	<div class="navbar-end flex-none">
-		<User />
-	</div>
+	<User />
 </div>
