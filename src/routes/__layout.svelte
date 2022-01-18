@@ -4,6 +4,10 @@
 	import Header from '$lib/Header/Header.svelte';
 </script>
 
+<head>
+	<title>Holdfast User Stats</title>
+</head>
+
 {#if browser}
 	<Header />
 {/if}
