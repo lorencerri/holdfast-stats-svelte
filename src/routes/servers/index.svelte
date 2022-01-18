@@ -71,7 +71,52 @@
 				<h1 class="mb-5 text-5xl font-bold">Servers</h1>
 				<p class="mb-5">Manage the stats for your Holdfast: Nations At War servers</p>
 				<br />
-
+				{#await user.getServers()}
+					<button class="btn btn-circle btn-ghost loading" />
+				{:then servers}
+					<table class="table w-full">
+						<thead>
+							{#if servers.length}
+								<tr>
+									<th>Server Name</th>
+									<th width="1" />
+								</tr>
+							{:else}
+								<tr>
+									<th>No Servers Found</th>
+								</tr>
+							{/if}
+						</thead>
+						<tbody>
+							{#each servers as server}
+								<tr>
+									<td class="bg-transparent border-none">{server.name}</td>
+									<td class="bg-transparent border-none">
+										<a
+											href={`/server/${server.id}`}
+											class="btn btn-ghost btn-xs justify-items-end grid"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												fill="none"
+												viewBox="0 0 24 24"
+												class="inline-block w-6 h-6 stroke-current"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M9 5l7 7-7 7"
+												/>
+											</svg>
+										</a>
+									</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				{/await}
+				<br />
 				<div class="form-control">
 					<div class="flex space-x-2">
 						<input

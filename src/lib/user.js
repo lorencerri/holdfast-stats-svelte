@@ -15,7 +15,13 @@ function createUser() {
 			return getUser()?.user_metadata?.avatar_url;
 		},
 		getId: () => {
-			return getUser()?.user_metadata?.id;
+			return getUser()?.user_metadata?.provider_id;
+		},
+		getServers: async function () {
+			const user_id = this.getId();
+			const { data } = await supabase.from('servers').select('*').eq('owner_id', user_id)
+
+			return data;
 		}
 	};
 }
