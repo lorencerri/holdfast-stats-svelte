@@ -4,7 +4,7 @@
 </script>
 
 {#if $user}
-	<div class="flex-none hidden lg:flex">
+	<div class="flex-none lg:flex">
 		<div class="flex items-stretch">
 			<button class="btn btn-ghost btn-sm rounded-btn">
 				Hello, {user.getUsername()}

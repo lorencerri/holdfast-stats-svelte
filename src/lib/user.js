@@ -13,6 +13,9 @@ function createUser() {
 		},
 		getAvatar: () => {
 			return getUser()?.user_metadata?.avatar_url;
+		},
+		getId: () => {
+			return getUser()?.user_metadata?.id;
 		}
 	};
 }
