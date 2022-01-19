@@ -8,12 +8,12 @@
 		let { data: server } = await supabase.from('servers').select('*').eq('id', id);
 		server = server[0];
 
-		let { data: stats } = await supabase
-			.from('stats')
-			.select('*, player(steam_id, *)')
-			.eq('server', id);
+		let { data: kills } = await supabase
+			.from('kills')
+			.select('*, killer(steam_id, *), victim(steam_id, *)')
+			.eq('server', server.id);
 
-		return { props: { server, stats } };
+		return { props: { server, kills } };
 	}
 </script>
 
@@ -21,16 +21,70 @@
 	import AdminSettings from '$lib/AdminSettings.svelte';
 
 	export let server;
-	export let stats;
+	export let kills;
+
+	let separateByTarget = false;
+
+	// Separate By Player
+	const combineByPlayer = (kills) => {
+		const k = kills.reduce((acc, cur) => {
+			const { steam_id: asi, username: au, regiment: ar } = cur.killer;
+			const { steam_id: vsi, username: vu, regiment: vr } = cur.victim;
+
+			// Killer
+			if (!acc[asi]) {
+				acc[asi] = { steam_id: asi, kills: 1, deaths: 0, username: au, regiment: ar };
+			} else acc[asi].kills += 1;
+
+			// Victim
+			if (!acc[vsi]) {
+				acc[vsi] = { steam_id: vsi, kills: 0, deaths: 1, username: vu, regiment: vr };
+			} else acc[vsi].deaths += 1;
+
+			return acc;
+		}, {});
+		return Object.values(k).sort((a, b) => (a.kills < b.kills ? 1 : -1));
+	};
+
+	// Separate By Player vs Target
+	const separateByPlayerVsTarget = (kills) => {
+		const k = kills.reduce((acc, cur) => {
+			const { steam_id: asi, username: au, regiment: ar } = cur.killer;
+			const { steam_id: vsi, username: vu, regiment: vr } = cur.victim;
+
+			// Find the index of the fight in the accumulator
+			let index = acc.findIndex((f) => f[asi] && f[vsi]);
+
+			// If not found, add the fight to the accumulator
+			if (index == -1) {
+				acc.push({
+					[asi]: { steam_id: asi, username: au, regiment: ar, kills: 0, deaths: 0 },
+					[vsi]: { steam_id: vsi, username: vu, regiment: vr, kills: 0, deaths: 0 }
+				});
+				index = acc.length - 1;
+			}
+
+			// Update the fight
+			acc[index][asi].kills += 1;
+			acc[index][vsi].deaths += 1;
+
+			return acc;
+		}, []);
+		return k
+			.map((f) => Object.values(f))
+			.sort((a, b) => (a[0].kills + a[1].kills < b[0].kills + b[1].kills ? 1 : -1));
+	};
+
+	console.log(separateByPlayerVsTarget(kills));
 
 	supabase
-		.from('stats')
+		.from('kills')
 		.on('*', async () => {
 			let { data } = await supabase
-				.from('stats')
-				.select('*, player(steam_id, *)')
+				.from('kills')
+				.select('*, killer(steam_id, *), victim(steam_id, *)')
 				.eq('server', server.id);
-			stats = data;
+			kills = data;
 		})
 		.subscribe();
 
@@ -66,23 +120,72 @@
 						{/if}
 					</div>
 					<div class="overflow-x-auto">
+						<label class="cursor-pointer label">
+							<span class="label-text">Separate By Fight</span>
+							<input type="checkbox" bind:checked={separateByTarget} class="toggle" />
+						</label>
 						<table class="table w-full">
 							<thead>
 								<tr>
-									<th>Player</th>
-									<th>Kills</th>
-									<th>Deaths</th>
+									{#if separateByTarget}
+										<th>Kills</th>
+										<th />
+										<th>Fight</th>
+										<th />
+										<th>Kills</th>
+									{:else}
+										<th>Player</th>
+										<th>Kills</th>
+										<th>Deaths</th>
+									{/if}
 								</tr>
 							</thead>
 							<div class="mb-2" />
 							<tbody>
-								{#each stats as stat}
-									<tr>
-										<td class="rounded-l-lg">{stat.player.username}</td>
-										<td>{stat.kills}</td>
-										<td class="rounded-r-lg">{stat.deaths}</td>
-									</tr>
-								{/each}
+								{#if separateByTarget}
+									{#each separateByPlayerVsTarget(kills) as fight, i}
+										<tr>
+											<td
+												class={`border-none ${i === 0 && 'rounded-tl-lg'} ${
+													separateByPlayerVsTarget(kills).length === i + 1 && 'rounded-bl-lg'
+												} ${fight[0].kills > fight[1].kills ? 'text-success' : 'text-error'}`}
+												>{fight[0].kills}</td
+											>
+											<td class="border-none text-right">
+												{fight[0].username}
+											</td>
+											<td class="border-none text-center">
+												<span class="font-bold">VS</span>
+											</td>
+											<td class="border-none text-left">
+												{fight[1].username}
+											</td>
+											<td
+												class={`border-none ${
+													combineByPlayer(kills).length === i + 1 && 'rounded-br-lg'
+												} ${i === 0 && 'rounded-tr-lg'} ${
+													fight[1].kills > fight[0].kills ? 'text-success' : 'text-error'
+												}`}>{fight[1].kills}</td
+											>
+										</tr>
+									{/each}
+								{:else}
+									{#each combineByPlayer(kills) as player, i}
+										<tr>
+											<td
+												class={`${i === 0 && 'rounded-tl-lg'} ${
+													combineByPlayer(kills).length === i + 1 && 'rounded-bl-lg'
+												} border-none`}>{player.username}</td
+											>
+											<td class="border-none">{player.kills}</td>
+											<td
+												class={`${combineByPlayer(kills).length === i + 1 && 'rounded-br-lg'} ${
+													i === 0 && 'rounded-tr-lg'
+												} border-none`}>{player.deaths}</td
+											>
+										</tr>
+									{/each}
+								{/if}
 							</tbody>
 						</table>
 					</div>
