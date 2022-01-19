@@ -152,12 +152,18 @@
 												>{fight[0].kills}</td
 											>
 											<td class="border-none text-right">
+												<span class="text-warning"
+													>{fight[0].regiment ? `[${fight[0].regiment}]` : ''}</span
+												>
 												{fight[0].username}
 											</td>
 											<td class="border-none text-center">
 												<span class="font-bold">VS</span>
 											</td>
 											<td class="border-none text-left">
+												<span class="text-warning"
+													>{fight[1].regiment ? `[${fight[1].regiment}]` : ''}</span
+												>
 												{fight[1].username}
 											</td>
 											<td
