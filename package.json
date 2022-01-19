@@ -25,9 +25,10 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@fouita/data-table": "^0.0.2",
 		"@supabase/supabase-js": "^1.29.2",
 		"daisyui": "^1.22.0",
-		"svelte-forms-lib": "^2.0.1",
+		"svelte-tailwind-table": "^0.9.11",
 		"tailwindcss": "^3.0.12",
 		"uuid": "^8.3.2"
 	}

@@ -1,12 +1,12 @@
 <script>
 	import { getSession } from '$lib/client';
-	export let data;
+	export let server;
 
 	let key = '';
 	let hidden = true;
 
 	const fetchToken = async () => {
-		let response = await fetch(`https://holdfast-api.plexidev.org/servers/${data.id}/token`, {
+		let response = await fetch(`https://holdfast-api.plexidev.org/servers/${server.id}/token`, {
 			headers: {
 				'Content-Type': 'application/json',
 				authorization: 'access_token ' + getSession()?.access_token
@@ -21,8 +21,6 @@
 	};
 
 	fetchToken();
-
-	console.log(data);
 </script>
 
 <h2 class="text-xl font-bold text-left mb-5">Administrator Settings</h2>
@@ -35,7 +33,7 @@
 			type="text"
 			placeholder="Server Name"
 			disabled="disabled"
-			value={`https://holdfast.plexidev.org/server/${data.id}`}
+			value={`https://holdfast.plexidev.org/server/${server.id}`}
 			class="input input-bordered text-gray-100"
 		/>
 	</div>
@@ -45,7 +43,7 @@
 	<div class="form-control">
 		<span class="label mt-2 text-left">Server Name</span>
 		<span class="label-text text-left" />
-		<input type="text" placeholder="Server Name" value={data.name} class="input  bg-neutral" />
+		<input type="text" placeholder="Server Name" value={server.name} class="input  bg-neutral" />
 	</div>
 
 	<div class="form-control">
