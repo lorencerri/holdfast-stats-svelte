@@ -7,6 +7,7 @@
 
 		let { data: server } = await supabase.from('servers').select('*').eq('id', id);
 		server = server[0];
+		if (!server) return { props: { server: null } };
 
 		let { data: kills } = await supabase
 			.from('kills')
@@ -74,8 +75,6 @@
 			.map((f) => Object.values(f))
 			.sort((a, b) => (a[0].kills + a[1].kills < b[0].kills + b[1].kills ? 1 : -1));
 	};
-
-	console.log(separateByPlayerVsTarget(kills));
 
 	supabase
 		.from('kills')
@@ -181,7 +180,11 @@
 											<td
 												class={`${i === 0 && 'rounded-tl-lg'} ${
 													combineByPlayer(kills).length === i + 1 && 'rounded-bl-lg'
-												} border-none`}>{player.username}</td
+												} border-none`}
+												><span class="text-warning"
+													>{player.regiment ? `[${player.regiment}]` : ''}</span
+												>
+												{player.username}</td
 											>
 											<td class="border-none">{player.kills}</td>
 											<td
