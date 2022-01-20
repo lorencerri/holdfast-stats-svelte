@@ -168,7 +168,7 @@
 											</td>
 											<td
 												class={`border-none ${
-													combineByPlayer(kills).length === i + 1 && 'rounded-br-lg'
+													separateByPlayerVsTarget(kills).length === i + 1 && 'rounded-br-lg'
 												} ${i === 0 && 'rounded-tr-lg'} ${
 													fight[1].kills > fight[0].kills ? 'text-success' : 'text-error'
 												}`}>{fight[1].kills}</td
