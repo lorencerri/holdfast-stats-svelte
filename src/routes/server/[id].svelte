@@ -27,7 +27,12 @@
 		ContentSwitcher,
 		Switch,
 		SideNav,
+		Checkbox,
 		TreeView,
+		Grid,
+		Row,
+		Column,
+		Toggle,
 		InlineLoading
 	} from 'carbon-components-svelte';
 	import AdminSettingsModal from '$lib/AdminSettingsModal.svelte';
@@ -43,6 +48,7 @@
 	let loading = false;
 	let activeId = 0;
 	let selectedIndex = 0;
+	let checked = false;
 
 	const filterByRound = (r, i) => {
 		if (i === 0) return r;
@@ -84,6 +90,14 @@
 		})
 		.subscribe();
 
+	supabase
+		.from('rounds')
+		.on('*', async () => {
+			console.log('rounds updated');
+			fetchRounds();
+		})
+		.subscribe();
+
 	if (server) {
 		fetchRounds();
 		fetchKills();
@@ -108,11 +122,30 @@
 		<Switch style="border-radius: 0;" text="Player Kill Log" />
 		<Switch style="border-radius: 0;" text="Heatmap" />
 	</ContentSwitcher>
-	<span style="padding: 20px 15px 6px; color: white; font-weight: bold;">Rounds</span>
+
+	<Grid fullWidth style="margin: 10px 0 0 0; padding: 0;">
+		<Row>
+			<Column style="margin: 10px 0 0 15px; text-align: left; vertical-align: middle;" sm={1}>
+				<span style="color: white; font-weight: bold;">Rounds</span>
+			</Column>
+			<Column style="margin-top: 2px;">
+				<Checkbox bind:checked labelText="Show Inactive" />
+			</Column>
+		</Row>
+	</Grid>
 	{#if rounds.length === 0}
 		<InlineLoading style="padding: 15px;" description="Loading..." />
 	{:else}
-		<TreeView bind:activeId children={[{ id: 0, text: 'Cumulative' }, ...roundsIndex]} />
+		<TreeView
+			bind:activeId
+			children={[
+				{ id: 0, text: 'Cumulative' },
+				...roundsIndex.filter((item) => {
+					if (checked) return true;
+					return !!kills.find((x) => x.round == item.ref);
+				})
+			]}
+		/>
 	{/if}
 </SideNav>
 
