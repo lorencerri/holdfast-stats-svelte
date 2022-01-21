@@ -37,12 +37,22 @@
 				bottom: {
 					title: 'x',
 					mapsTo: 'x',
-					scaleType: 'linear'
+					scaleType: 'linear',
+					includeZero: false
 				},
 				left: {
 					title: 'y',
 					mapsTo: 'y',
-					scaleType: 'linear'
+					scaleType: 'linear',
+					includeZero: false
+				}
+			},
+			grid: {
+				x: {
+					alignWithAxisTicks: true
+				},
+				y: {
+					alignWithAxisTicks: true
 				}
 			},
 			height: '800px',
