@@ -5,89 +5,66 @@
 	export async function load(ctx) {
 		const { id } = ctx.params;
 
+		if (!id) {
+			ctx.redirect('/');
+			return;
+		}
+
 		let { data: server } = await supabase.from('servers').select('*').eq('id', id);
 		server = server[0];
 		if (!server) return { props: { server: null } };
 
-		let { data: kills } = await supabase
-			.from('kills')
-			.select('*, killer(steam_id, *), victim(steam_id, *)')
-			.eq('server', server.id);
-
-		return { props: { server, kills } };
+		return { props: { server } };
 	}
 </script>
 
 <script>
-	import AdminSettings from '$lib/AdminSettings.svelte';
+	import { DataTable, Loading, Content, SideNav, TreeView } from 'carbon-components-svelte';
+	import AdminSettingsModal from '$lib/AdminSettingsModal.svelte';
+	import ago from 's-ago';
+	import getEnum from '$lib/enums.js';
 
 	export let server;
-	export let kills;
 
-	let separateByTarget = false;
+	let kills = [];
+	let rounds = [];
+	let roundsIndex = [];
+	let loading = false;
 
-	// Separate By Player
-	const combineByPlayer = (kills) => {
-		const k = kills.reduce((acc, cur) => {
-			const { steam_id: asi, username: au, regiment: ar } = cur.killer;
-			const { steam_id: vsi, username: vu, regiment: vr } = cur.victim;
+	const fetchKills = async () => {
+		loading = true;
+		const { data } = await supabase
+			.from('kills')
+			.select('*, killer(steam_id, *), victim(steam_id, *)')
+			.eq('server', server.id)
+			.order('timestamp', { ascending: false });
 
-			// Killer
-			if (!acc[asi]) {
-				acc[asi] = { steam_id: asi, kills: 1, deaths: 0, username: au, regiment: ar };
-			} else acc[asi].kills += 1;
-
-			// Victim
-			if (!acc[vsi]) {
-				acc[vsi] = { steam_id: vsi, kills: 0, deaths: 1, username: vu, regiment: vr };
-			} else acc[vsi].deaths += 1;
-
-			return acc;
-		}, {});
-		return Object.values(k).sort((a, b) => (a.kills < b.kills ? 1 : -1));
+		loading = false;
+		kills = data;
 	};
 
-	// Separate By Player vs Target
-	const separateByPlayerVsTarget = (kills) => {
-		const k = kills.reduce((acc, cur) => {
-			const { steam_id: asi, username: au, regiment: ar } = cur.killer;
-			const { steam_id: vsi, username: vu, regiment: vr } = cur.victim;
+	const fetchRounds = async () => {
+		const { data } = await supabase
+			.from('rounds')
+			.select('*')
+			.eq('server', server.id)
+			.order('timestamp', { ascending: false });
 
-			// Find the index of the fight in the accumulator
-			let index = acc.findIndex((f) => f[asi] && f[vsi]);
-
-			// If not found, add the fight to the accumulator
-			if (index == -1) {
-				acc.push({
-					[asi]: { steam_id: asi, username: au, regiment: ar, kills: 0, deaths: 0 },
-					[vsi]: { steam_id: vsi, username: vu, regiment: vr, kills: 0, deaths: 0 }
-				});
-				index = acc.length - 1;
-			}
-
-			// Update the fight
-			acc[index][asi].kills += 1;
-			acc[index][vsi].deaths += 1;
-
-			return acc;
-		}, []);
-		return k
-			.map((f) => Object.values(f))
-			.sort((a, b) => (a[0].kills + a[1].kills < b[0].kills + b[1].kills ? 1 : -1));
+		rounds = data;
+		roundsIndex = rounds.map((v, i) => ({ id: i + 2, text: ago(new Date(v.timestamp)) }));
 	};
 
 	supabase
 		.from('kills')
 		.on('*', async () => {
-			let { data } = await supabase
-				.from('kills')
-				.select('*, killer(steam_id, *), victim(steam_id, *)')
-				.eq('server', server.id);
-			kills = data;
+			fetchKills();
 		})
 		.subscribe();
 
-	let settingsState = false;
+	if (server) {
+		fetchRounds();
+		fetchKills();
+	}
 </script>
 
 <svelte:head>
@@ -96,116 +73,54 @@
 	{/if}
 </svelte:head>
 
-<div class="hero">
-	<div class="text-center">
-		<div>
-			{#if server}
-				<h1 class="mb-5 text-4xl font-bold">{server.name}</h1>
+{#if loading}
+	<Loading />
+{/if}
 
-				<div class="flex flex-col w-full">
-					<div class="divider">
-						{#if $user && server.owner_id === user.getId()}
-							<button class="btn btn-sm" on:click={() => (settingsState = true)}
-								>Admin Settings</button
-							>
-							<div class={`modal ${settingsState && 'modal-open'}`}>
-								<div class="modal-box">
-									<AdminSettings {server} />
-									<div class="modal-action">
-										<button on:click={() => (settingsState = false)} class="btn">Close</button>
-									</div>
-								</div>
-							</div>
-						{/if}
-					</div>
-					<div class="overflow-x-auto">
-						<label class="cursor-pointer label">
-							<span class="label-text">Separate By Fight</span>
-							<input type="checkbox" bind:checked={separateByTarget} class="toggle" />
-						</label>
-						<table class="table w-full">
-							<thead>
-								<tr>
-									{#if separateByTarget}
-										<th>Kills</th>
-										<th />
-										<th>Fight</th>
-										<th />
-										<th>Kills</th>
-									{:else}
-										<th>Player</th>
-										<th>Kills</th>
-										<th>Deaths</th>
-									{/if}
-								</tr>
-							</thead>
-							<div class="mb-2" />
-							<tbody>
-								{#if separateByTarget}
-									{#each separateByPlayerVsTarget(kills) as fight, i}
-										<tr>
-											<td
-												class={`border-none ${i === 0 && 'rounded-tl-lg'} ${
-													separateByPlayerVsTarget(kills).length === i + 1 && 'rounded-bl-lg'
-												} ${fight[0].kills > fight[1].kills ? 'text-success' : 'text-error'}`}
-												>{fight[0].kills}</td
-											>
-											<td class="border-none text-right">
-												<span class="text-warning"
-													>{fight[0].regiment ? `[${fight[0].regiment}]` : ''}</span
-												>
-												{fight[0].username}
-											</td>
-											<td class="border-none text-center">
-												<span class="font-bold">VS</span>
-											</td>
-											<td class="border-none text-left">
-												<span class="text-warning"
-													>{fight[1].regiment ? `[${fight[1].regiment}]` : ''}</span
-												>
-												{fight[1].username}
-											</td>
-											<td
-												class={`border-none ${
-													separateByPlayerVsTarget(kills).length === i + 1 && 'rounded-br-lg'
-												} ${i === 0 && 'rounded-tr-lg'} ${
-													fight[1].kills > fight[0].kills ? 'text-success' : 'text-error'
-												}`}>{fight[1].kills}</td
-											>
-										</tr>
-									{/each}
-								{:else}
-									{#each combineByPlayer(kills) as player, i}
-										<tr>
-											<td
-												class={`${i === 0 && 'rounded-tl-lg'} ${
-													combineByPlayer(kills).length === i + 1 && 'rounded-bl-lg'
-												} border-none`}
-												><span class="text-warning"
-													>{player.regiment ? `[${player.regiment}]` : ''}</span
-												>
-												{player.username}</td
-											>
-											<td class="border-none">{player.kills}</td>
-											<td
-												class={`${combineByPlayer(kills).length === i + 1 && 'rounded-br-lg'} ${
-													i === 0 && 'rounded-tr-lg'
-												} border-none`}>{player.deaths}</td
-											>
-										</tr>
-									{/each}
-								{/if}
-							</tbody>
-						</table>
-					</div>
-				</div>
-			{:else}
-				<h1 class="mb-5 text-4xl font-bold">Unknown Server</h1>
-				<p class="mb-5">
-					A server with the specified ID does not exist. You can create a server by logging in and
-					clicking on <a class="link link-accent" href="/servers">servers</a> in the top right.
-				</p>
+<SideNav isOpen>
+	{#if $user && server.owner_id === user.getId()}
+		<AdminSettingsModal {server} />
+	{/if}
+
+	<span style="padding: 20px 15px 6px; color: white; font-weight: bold;">Rounds</span>
+	<TreeView
+		activeId={0}
+		children={[{ id: 0, text: 'Cumulative' }, { id: 1, text: 'Current' }, ...roundsIndex]}
+	/>
+</SideNav>
+
+<Content style="background: transparent; padding: 0;">
+	<DataTable
+		title="Player Kill Log"
+		description="A list of all player kills that have occurred on this server based on the scope."
+		style="padding: 0; background-color: transparent;"
+		headers={[
+			{ key: 'killer', value: 'Attacker' },
+			{ key: 'victim', value: 'Killed' },
+			{ key: 'timestamp', value: 'Timestamp' },
+			{ key: 'details', value: 'Weapon' },
+			{ key: 'reason', value: 'Reason' }
+		]}
+		rows={kills}
+	>
+		<span slot="cell" let:row let:cell>
+			{#if cell.key === 'killer'}
+				{#if row.killer.regiment}
+					<span style="color: #f1c21b">[{row.killer.regiment}]</span>
+				{/if}
+				{row.killer.username}
+			{:else if cell.key === 'victim'}
+				{#if row.victim.regiment}
+					<span style="color: #f1c21b">[{row.victim.regiment}]</span>
+				{/if}
+				{row.victim.username}
+			{:else if cell.key === 'timestamp'}
+				{new Date(row.timestamp).toLocaleTimeString()}
+			{:else if cell.key === 'details'}
+				{row.details}
+			{:else if cell.key === 'reason'}
+				{getEnum('EntityHealthChangedReason')[row.reason]}
 			{/if}
-		</div>
-	</div>
-</div>
+		</span>
+	</DataTable>
+</Content>

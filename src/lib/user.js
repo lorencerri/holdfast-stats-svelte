@@ -8,6 +8,9 @@ function createUser() {
 		subscribe,
 		set,
 		update,
+		getUser: () => {
+			return getUser()
+		},
 		getUsername: () => {
 			return getUser()?.user_metadata?.name;
 		},
