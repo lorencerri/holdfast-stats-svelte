@@ -1,44 +1,72 @@
 <script context="module">
 	import { supabase } from '$lib/client';
-
 	export async function load(ctx) {
-		let { data: servers } = await supabase.from('servers').select('*');
-
-		return { props: { servers } };
+		const { data: servers } = await supabase.from('servers').select('*');
+		const { count: kills } = await supabase
+			.from('kills')
+			.select('*', { count: 'exact', head: true });
+		return { props: { servers, kills } };
 	}
 </script>
 
 <script>
+	import {
+		InlineLoading,
+		Link,
+		DataTable,
+		Content,
+		SideNav,
+		TreeView
+	} from 'carbon-components-svelte';
+	import BareMetalServer20 from 'carbon-icons-svelte/lib/BareMetalServer20';
+
 	export let servers = [];
-	console.log(servers);
+	export let kills = 0;
+
+	const getServerRowCount = async (serverId, row) => {
+		if (!row) return null;
+		const { count } = await supabase
+			.from(row)
+			.select('*', { count: 'exact', head: true })
+			.eq('server', serverId);
+		return count;
+	};
 </script>
 
-<div class="hero">
-	<div class="text-center hero-content">
-		<div class="max-w-lg">
-			<h1 class="mb-5 text-5xl font-bold">Holdfast Player Stats</h1>
-			<p class="mb-5">
-				<i class="text-info"
-					>Personal project by <a
-						href="https://steamcommunity.com/id/TrueXPixels/"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="link link-accent no-underline">TrueXPixels</a
-					>, not affiliated with Holdfast.</i
-				>
-			</p>
-			<div class="divider m-10">Servers</div>
-			{#each servers as server}
-				<a href={`/server/${server.id}`}><button class="btn glass mx-2">{server.name}</button></a>
-			{/each}
-			<div class="divider m-10">Information</div>
-			<a
-				href="https://steamcommunity.com/sharedfiles/filedetails/?id=2715432949"
-				target="_blank"
-				rel="noopener noreferrer"
-			>
-				<button class="btn glass mx-2">Steam Workshop Page & Setup Guide</button>
-			</a>
-		</div>
-	</div>
-</div>
+<SideNav isOpen>
+	<TreeView children={[{ id: 0, text: 'No Server Selected', icon: BareMetalServer20 }]} />
+</SideNav>
+
+<Content style="background: transparent; padding: 0;">
+	<DataTable
+		title="Servers"
+		style="padding: 0; background-color: transparent;"
+		description={`Currently tracking ${kills} kills in ${servers.length} servers.`}
+		headers={[
+			{ key: 'name', value: 'Name' },
+			{ key: 'kills', value: 'Kills' },
+			{ key: 'rounds', value: 'Rounds' }
+		]}
+		rows={servers}
+	>
+		<span slot="cell" let:row let:cell>
+			{#if cell.key === 'name'}
+				<Link href={`/server/${row.id}`}>
+					{cell.value}
+				</Link>
+			{:else if cell.key === 'kills'}
+				{#await getServerRowCount(row.id, 'kills')}
+					<InlineLoading />
+				{:then kills}
+					{kills}
+				{/await}
+			{:else if cell.key === 'rounds'}
+				{#await getServerRowCount(row.id, 'rounds')}
+					<InlineLoading />
+				{:then kills}
+					{kills}
+				{/await}
+			{/if}
+		</span>
+	</DataTable>
+</Content>
