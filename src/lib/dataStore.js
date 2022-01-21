@@ -1,5 +1,4 @@
 import { writable } from 'svelte/store';
-import { supabase } from '$lib/client';
 
 function createDataStore() {
 	const { subscribe, set, update } = writable({});
