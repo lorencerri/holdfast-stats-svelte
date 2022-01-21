@@ -19,8 +19,17 @@
 </script>
 
 <script>
-	import { DataTable, Loading, Content, SideNav, TreeView } from 'carbon-components-svelte';
+	import {
+		DataTable,
+		Loading,
+		Content,
+		ContentSwitcher,
+		Switch,
+		SideNav,
+		TreeView
+	} from 'carbon-components-svelte';
 	import AdminSettingsModal from '$lib/AdminSettingsModal.svelte';
+	import Heatmap from '$lib/Heatmap.svelte';
 	import ago from 's-ago';
 	import getEnum from '$lib/enums.js';
 
@@ -31,6 +40,7 @@
 	let roundsIndex = [];
 	let loading = false;
 	let activeId = 0;
+	let selectedIndex = 0;
 
 	const filterByRound = (r, i) => {
 		if (i === 0) return r;
@@ -67,6 +77,7 @@
 	supabase
 		.from('kills')
 		.on('*', async () => {
+			console.log('kills updated');
 			fetchKills();
 		})
 		.subscribe();
@@ -91,43 +102,50 @@
 	{#if $user && server.owner_id === user.getId()}
 		<AdminSettingsModal {server} />
 	{/if}
-
+	<ContentSwitcher size="sm" bind:selectedIndex>
+		<Switch style="border-radius: 0;" text="Player Kill Log" />
+		<Switch style="border-radius: 0;" text="Heatmap" />
+	</ContentSwitcher>
 	<span style="padding: 20px 15px 6px; color: white; font-weight: bold;">Rounds</span>
 	<TreeView bind:activeId children={[{ id: 0, text: 'Cumulative' }, ...roundsIndex]} />
 </SideNav>
 
 <Content style="background: transparent; padding: 0;">
-	<DataTable
-		title="Player Kill Log"
-		description="A list of all player kills that have occurred on this server based on the scope."
-		style="padding: 0; background-color: transparent;"
-		headers={[
-			{ key: 'killer', value: 'Attacker' },
-			{ key: 'victim', value: 'Killed' },
-			{ key: 'timestamp', value: 'Timestamp' },
-			{ key: 'details', value: 'Weapon' },
-			{ key: 'reason', value: 'Reason' }
-		]}
-		rows={filterByRound(kills, activeId)}
-	>
-		<span slot="cell" let:row let:cell>
-			{#if cell.key === 'killer'}
-				{#if row.killer.regiment}
-					<span style="color: #f1c21b">[{row.killer.regiment}]</span>
+	{#if selectedIndex === 0}
+		<DataTable
+			title="Player Kill Log"
+			description="A list of all player kills that have occurred on this server based on the scope."
+			style="padding: 0; background-color: transparent;"
+			headers={[
+				{ key: 'killer', value: 'Attacker' },
+				{ key: 'victim', value: 'Killed' },
+				{ key: 'timestamp', value: 'Timestamp' },
+				{ key: 'details', value: 'Weapon' },
+				{ key: 'reason', value: 'Reason' }
+			]}
+			rows={filterByRound(kills, activeId)}
+		>
+			<span slot="cell" let:row let:cell>
+				{#if cell.key === 'killer'}
+					{#if row.killer.regiment}
+						<span style="color: #f1c21b">[{row.killer.regiment}]</span>
+					{/if}
+					{row.killer.username}
+				{:else if cell.key === 'victim'}
+					{#if row.victim.regiment}
+						<span style="color: #f1c21b">[{row.victim.regiment}]</span>
+					{/if}
+					{row.victim.username}
+				{:else if cell.key === 'timestamp'}
+					{new Date(row.timestamp).toLocaleTimeString()}
+				{:else if cell.key === 'details'}
+					{row.details}
+				{:else if cell.key === 'reason'}
+					{getEnum('EntityHealthChangedReason')[row.reason]}
 				{/if}
-				{row.killer.username}
-			{:else if cell.key === 'victim'}
-				{#if row.victim.regiment}
-					<span style="color: #f1c21b">[{row.victim.regiment}]</span>
-				{/if}
-				{row.victim.username}
-			{:else if cell.key === 'timestamp'}
-				{new Date(row.timestamp).toLocaleTimeString()}
-			{:else if cell.key === 'details'}
-				{row.details}
-			{:else if cell.key === 'reason'}
-				{getEnum('EntityHealthChangedReason')[row.reason]}
-			{/if}
-		</span>
-	</DataTable>
+			</span>
+		</DataTable>
+	{:else if selectedIndex === 1}
+		<Heatmap rows={filterByRound(kills, activeId)} />
+	{/if}
 </Content>
