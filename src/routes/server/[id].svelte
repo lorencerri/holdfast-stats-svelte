@@ -1,6 +1,7 @@
 <script context="module">
 	import { supabase } from '$lib/client';
 	import { user } from '$lib/user';
+	import { dataStore } from '$lib/dataStore';
 
 	export async function load(ctx) {
 		const { id } = ctx.params;
@@ -26,7 +27,8 @@
 		ContentSwitcher,
 		Switch,
 		SideNav,
-		TreeView
+		TreeView,
+		InlineLoading
 	} from 'carbon-components-svelte';
 	import AdminSettingsModal from '$lib/AdminSettingsModal.svelte';
 	import Heatmap from '$lib/Heatmap.svelte';
@@ -107,7 +109,11 @@
 		<Switch style="border-radius: 0;" text="Heatmap" />
 	</ContentSwitcher>
 	<span style="padding: 20px 15px 6px; color: white; font-weight: bold;">Rounds</span>
-	<TreeView bind:activeId children={[{ id: 0, text: 'Cumulative' }, ...roundsIndex]} />
+	{#if rounds.length === 0}
+		<InlineLoading style="padding: 15px;" description="Loading..." />
+	{:else}
+		<TreeView bind:activeId children={[{ id: 0, text: 'Cumulative' }, ...roundsIndex]} />
+	{/if}
 </SideNav>
 
 <Content style="background: transparent; padding: 0;">
