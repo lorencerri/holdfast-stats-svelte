@@ -24,15 +24,13 @@
 		DataTable,
 		Loading,
 		Content,
-		ContentSwitcher,
-		Switch,
 		SideNav,
 		Checkbox,
 		TreeView,
 		Grid,
 		Row,
 		Column,
-		Toggle,
+		Dropdown,
 		InlineLoading
 	} from 'carbon-components-svelte';
 	import AdminSettingsModal from '$lib/AdminSettingsModal.svelte';
@@ -47,7 +45,7 @@
 	let roundsIndex = [];
 	let loading = false;
 	let activeId = 0;
-	let selectedIndex = 0;
+	let selectedIndex = '0';
 	let checked = false;
 
 	const filterByRound = (r, i) => {
@@ -118,10 +116,17 @@
 	{#if $user && server.owner_id === user.getId()}
 		<AdminSettingsModal {server} />
 	{/if}
-	<ContentSwitcher size="sm" bind:selectedIndex>
-		<Switch style="border-radius: 0;" text="Player Kill Log" />
-		<Switch style="border-radius: 0;" text="Heatmap" />
-	</ContentSwitcher>
+	<span style="color: white; font-weight: bold; margin: 18px 10px 10px 15px;">Data View</span>
+	<Dropdown
+		bind:selectedIndex
+		style="border-bottom: 1px solid #393939;"
+		label="Player Kill Log"
+		on:select={(e) => (selectedIndex = e.detail.selectedId)}
+		items={[
+			{ id: 0, text: 'Player Kill Log' },
+			{ id: 1, text: 'Heatmap' }
+		]}
+	/>
 
 	<Grid fullWidth style="margin: 10px 0 0 0; padding: 0;">
 		<Row>
@@ -150,7 +155,7 @@
 </SideNav>
 
 <Content style="background: transparent; padding: 0;">
-	{#if selectedIndex === 0}
+	{#if selectedIndex == 0}
 		<DataTable
 			title="Player Kill Log"
 			description="A list of all player kills that have occurred on this server based on the scope."
@@ -184,7 +189,7 @@
 				{/if}
 			</span>
 		</DataTable>
-	{:else if selectedIndex === 1}
+	{:else if selectedIndex == 1}
 		<Heatmap rows={filterByRound(kills, activeId)} />
 	{/if}
 </Content>

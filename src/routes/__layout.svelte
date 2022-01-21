@@ -14,6 +14,7 @@
 
 <style>
 	:global(.bx--side-nav__navigation > button),
+	:global(.bx--side-nav__navigation .bx--dropdown__wrapper *),
 	:global(.bx--side-nav__navigation .bx--tree-node),
 	:global(.bx--side-nav__navigation .bx--tree-node *),
 	:global(.bx--side-nav__navigation) {
