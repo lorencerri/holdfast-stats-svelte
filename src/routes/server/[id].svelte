@@ -30,6 +30,12 @@
 	let rounds = [];
 	let roundsIndex = [];
 	let loading = false;
+	let activeId = 0;
+
+	const filterByRound = (r, i) => {
+		if (i === 0) return r;
+		else return r.filter((x) => x.round === roundsIndex[i - 2]?.ref);
+	};
 
 	const fetchKills = async () => {
 		loading = true;
@@ -39,8 +45,8 @@
 			.eq('server', server.id)
 			.order('timestamp', { ascending: false });
 
-		loading = false;
 		kills = data;
+		loading = false;
 	};
 
 	const fetchRounds = async () => {
@@ -51,7 +57,11 @@
 			.order('timestamp', { ascending: false });
 
 		rounds = data;
-		roundsIndex = rounds.map((v, i) => ({ id: i + 2, text: ago(new Date(v.timestamp)) }));
+		roundsIndex = rounds.map((v, i) => ({
+			id: i + 2,
+			text: i === 0 ? 'Current' : ago(new Date(v.timestamp)),
+			ref: v.id
+		}));
 	};
 
 	supabase
@@ -83,10 +93,7 @@
 	{/if}
 
 	<span style="padding: 20px 15px 6px; color: white; font-weight: bold;">Rounds</span>
-	<TreeView
-		activeId={0}
-		children={[{ id: 0, text: 'Cumulative' }, { id: 1, text: 'Current' }, ...roundsIndex]}
-	/>
+	<TreeView bind:activeId children={[{ id: 0, text: 'Cumulative' }, ...roundsIndex]} />
 </SideNav>
 
 <Content style="background: transparent; padding: 0;">
@@ -101,7 +108,7 @@
 			{ key: 'details', value: 'Weapon' },
 			{ key: 'reason', value: 'Reason' }
 		]}
-		rows={kills}
+		rows={filterByRound(kills, activeId)}
 	>
 		<span slot="cell" let:row let:cell>
 			{#if cell.key === 'killer'}
