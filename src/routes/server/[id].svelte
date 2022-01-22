@@ -32,7 +32,8 @@
 		Column,
 		Dropdown,
 		DropdownSkeleton,
-		InlineLoading
+		InlineLoading,
+		Pagination
 	} from 'carbon-components-svelte';
 	import AdminSettingsModal from '$lib/AdminSettingsModal.svelte';
 	import Heatmap from '$lib/Heatmap.svelte';
@@ -242,6 +243,8 @@
 				})
 			]}
 		/>
+
+		<!--bx--tree bx--tree--default-->
 	{/if}
 </SideNav>
 
