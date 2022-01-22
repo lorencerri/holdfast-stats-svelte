@@ -215,7 +215,7 @@
 	{#if selectedIndex == 2}
 		<Grid fullWidth style="border-bottom: 1px solid #393939; margin: 10px 0 0 0; padding: 15px;">
 			<div style="color: white; font-weight: bold; margin-bottom: 10px;">Options</div>
-			<Checkbox bind:checked={separateByInteraction} labelText="Separate by interaction" />
+			<Checkbox bind:checked={separateByInteraction} labelText="Separate by exchange" />
 		</Grid>
 	{/if}
 
@@ -288,7 +288,7 @@
 	{:else if selectedIndex == 2}
 		{#if separateByInteraction}<DataTable
 				title="Leaderboard"
-				description="A sortable list of all players on this server based on the scope, separated by interaction."
+				description="A sortable list of all players on this server based on the scope, separated by exchange."
 				style="padding: 0; background-color: transparent;"
 				headers={[
 					{ key: 'player2', value: 'Player One' },
