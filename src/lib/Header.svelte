@@ -19,7 +19,7 @@
 	let isOpen = false;
 </script>
 
-<Header href="/" platformName="Holdfast Player Stats">
+<Header href="/" platformName="My Application">
 	<div slot="skip-to-content">
 		<SkipToContent />
 	</div>
